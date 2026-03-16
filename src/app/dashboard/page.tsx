@@ -4,7 +4,9 @@ import { format, parseISO } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DatePicker } from "./_components/DatePicker";
+import { AddWorkoutDialog } from "./_components/AddWorkoutDialog";
 import { getWorkoutsForUserOnDate } from "@/data/workouts";
+import { getAllExercises } from "@/data/exercises";
 
 interface Props {
   searchParams: Promise<{ date?: string }>;
@@ -16,8 +18,12 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   const { date: dateParam } = await searchParams;
   const date = dateParam ? parseISO(dateParam) : new Date();
+  const dateString = format(date, "yyyy-MM-dd");
 
-  const workouts = await getWorkoutsForUserOnDate(userId, date);
+  const [workouts, availableExercises] = await Promise.all([
+    getWorkoutsForUserOnDate(userId, date),
+    getAllExercises(),
+  ]);
 
   return (
     <div className="container mx-auto max-w-2xl py-10 px-4">
@@ -28,9 +34,11 @@ export default async function DashboardPage({ searchParams }: Props) {
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-lg font-medium">
-          Workouts on {format(date, "do MMM yyyy")}
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium">
+            Workouts on {format(date, "do MMM yyyy")}
+          </h2>
+        </div>
 
         {workouts.length === 0 ? (
           <p className="text-muted-foreground text-sm">No workouts logged for this date.</p>
@@ -47,12 +55,8 @@ export default async function DashboardPage({ searchParams }: Props) {
                     <div className="flex flex-wrap gap-2">
                       {we.sets.map((set) => (
                         <div key={set.id} className="flex items-center gap-1">
-                          <Badge variant="secondary">
-                            {set.reps} reps
-                          </Badge>
-                          <Badge variant="outline">
-                            {set.weight}{set.unit}
-                          </Badge>
+                          <Badge variant="secondary">{set.reps} reps</Badge>
+                          <Badge variant="outline">{set.weight}{set.unit}</Badge>
                         </div>
                       ))}
                     </div>
@@ -62,6 +66,8 @@ export default async function DashboardPage({ searchParams }: Props) {
             </Card>
           ))
         )}
+
+        <AddWorkoutDialog date={dateString} availableExercises={availableExercises} />
       </div>
     </div>
   );

@@ -8,7 +8,8 @@
       "mcp__neon__run_sql_transaction",
       "Bash(cd C:/Users/FieR/liftingdiarycourse && npx shadcn@latest add calendar popover card badge --yes 2>&1)",
       "Bash(cd C:/Users/FieR/liftingdiarycourse && node -e \"require\\('date-fns'\\)\" 2>&1 | head -3)",
-      "Bash(ls C:\\\\Users\\\\FieR\\\\liftingdiarycourse/doc* 2>/dev/null || echo \"no doc dir\")"
+      "Bash(ls C:\\\\Users\\\\FieR\\\\liftingdiarycourse/doc* 2>/dev/null || echo \"no doc dir\")",
+      "Bash(npx shadcn@latest add dialog input label select --yes 2>&1)"
     ]
   },
   "enabledMcpjsonServers": [
