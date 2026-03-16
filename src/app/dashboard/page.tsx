@@ -1,0 +1,68 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { format, parseISO } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { DatePicker } from "./_components/DatePicker";
+import { getWorkoutsForUserOnDate } from "@/data/workouts";
+
+interface Props {
+  searchParams: Promise<{ date?: string }>;
+}
+
+export default async function DashboardPage({ searchParams }: Props) {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const { date: dateParam } = await searchParams;
+  const date = dateParam ? parseISO(dateParam) : new Date();
+
+  const workouts = await getWorkoutsForUserOnDate(userId, date);
+
+  return (
+    <div className="container mx-auto max-w-2xl py-10 px-4">
+      <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
+
+      <div className="mb-8">
+        <DatePicker selected={date} />
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-lg font-medium">
+          Workouts on {format(date, "do MMM yyyy")}
+        </h2>
+
+        {workouts.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No workouts logged for this date.</p>
+        ) : (
+          workouts.map((workout) => (
+            <Card key={workout.id}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">{workout.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {workout.workoutExercises.map((we) => (
+                  <div key={we.id} className="space-y-1">
+                    <p className="text-sm font-medium">{we.exercise.name}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {we.sets.map((set) => (
+                        <div key={set.id} className="flex items-center gap-1">
+                          <Badge variant="secondary">
+                            {set.reps} reps
+                          </Badge>
+                          <Badge variant="outline">
+                            {set.weight}{set.unit}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

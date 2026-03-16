@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## IMPORTANT: Documentation First
+
+**Before generating any code, Claude Code MUST first consult the relevant documentation files in the `/docs` directory.** Always read and follow the guidelines, conventions, and examples found there before writing or modifying any code:
+
+-/docs/ui.md
+-/docs/data-fetching.md
+
 ## Commands
 
 ```bash
