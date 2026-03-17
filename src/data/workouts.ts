@@ -47,6 +47,65 @@ export async function createWorkout(
   return workout;
 }
 
+export async function getWorkoutById(workoutId: number, userId: string) {
+  return db.query.workouts.findFirst({
+    where: and(eq(workouts.id, workoutId), eq(workouts.userId, userId)),
+    with: {
+      workoutExercises: {
+        orderBy: (we, { asc }) => asc(we.orderIndex),
+        with: {
+          exercise: true,
+          sets: {
+            orderBy: (s, { asc }) => asc(s.setNumber),
+          },
+        },
+      },
+    },
+  });
+}
+
+export async function updateWorkout(
+  workoutId: number,
+  userId: string,
+  name: string,
+  performedAt: Date,
+  exerciseInputs: ExerciseInput[]
+) {
+  // Verify ownership
+  const existing = await db.query.workouts.findFirst({
+    where: and(eq(workouts.id, workoutId), eq(workouts.userId, userId)),
+  });
+  if (!existing) throw new Error("Workout not found");
+
+  await db
+    .update(workouts)
+    .set({ name, performedAt })
+    .where(and(eq(workouts.id, workoutId), eq(workouts.userId, userId)));
+
+  // Delete existing exercises (cascades to sets)
+  await db.delete(workoutExercises).where(eq(workoutExercises.workoutId, workoutId));
+
+  for (let i = 0; i < exerciseInputs.length; i++) {
+    const ex = exerciseInputs[i];
+    const [we] = await db
+      .insert(workoutExercises)
+      .values({ workoutId, exerciseId: ex.exerciseId, orderIndex: i })
+      .returning({ id: workoutExercises.id });
+
+    if (ex.sets.length > 0) {
+      await db.insert(sets).values(
+        ex.sets.map((s, idx) => ({
+          workoutExerciseId: we.id,
+          setNumber: idx + 1,
+          reps: s.reps,
+          weight: String(s.weight),
+          unit: s.unit,
+        }))
+      );
+    }
+  }
+}
+
 export async function getWorkoutsForUserOnDate(userId: string, date: Date) {
   const startOfDay = new Date(date);
   startOfDay.setHours(0, 0, 0, 0);
