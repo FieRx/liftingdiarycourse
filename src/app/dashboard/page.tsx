@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { format, parseISO } from "date-fns";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DatePicker } from "./_components/DatePicker";
@@ -45,26 +46,28 @@ export default async function DashboardPage({ searchParams }: Props) {
           <p className="text-muted-foreground text-sm">No workouts logged for this date.</p>
         ) : (
           workouts.map((workout) => (
-            <Card key={workout.id}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">{workout.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {workout.workoutExercises.map((we) => (
-                  <div key={we.id} className="space-y-1">
-                    <p className="text-sm font-medium">{we.exercise.name}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {we.sets.map((set) => (
-                        <div key={set.id} className="flex items-center gap-1">
-                          <Badge variant="secondary">{set.reps} reps</Badge>
-                          <Badge variant="outline">{set.weight}{set.unit}</Badge>
-                        </div>
-                      ))}
+            <Link key={workout.id} href={`/dashboard/workout/${workout.id}`} className="block">
+              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">{workout.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {workout.workoutExercises.map((we) => (
+                    <div key={we.id} className="space-y-1">
+                      <p className="text-sm font-medium">{we.exercise.name}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {we.sets.map((set) => (
+                          <div key={set.id} className="flex items-center gap-1">
+                            <Badge variant="secondary">{set.reps} reps</Badge>
+                            <Badge variant="outline">{set.weight}{set.unit}</Badge>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+                  ))}
+                </CardContent>
+              </Card>
+            </Link>
           ))
         )}
 
