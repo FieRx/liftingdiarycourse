@@ -26,19 +26,20 @@ export default async function DashboardPage({ searchParams }: Props) {
   ]);
 
   return (
-    <div className="container mx-auto max-w-2xl py-10 px-4">
+    <div className="container mx-auto max-w-5xl py-10 px-4">
       <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
 
-      <div className="mb-8">
-        <DatePicker selected={date} />
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium">
-            Workouts on {format(date, "do MMM yyyy")}
-          </h2>
+      <div className="flex flex-col md:flex-row gap-8 items-start">
+        <div className="shrink-0">
+          <DatePicker selected={date} />
         </div>
+
+        <div className="flex-1 space-y-4 min-w-0">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-medium">
+              Workouts on {format(date, "do MMM yyyy")}
+            </h2>
+          </div>
 
         {workouts.length === 0 ? (
           <p className="text-muted-foreground text-sm">No workouts logged for this date.</p>
@@ -67,7 +68,8 @@ export default async function DashboardPage({ searchParams }: Props) {
           ))
         )}
 
-        <AddWorkoutDialog date={dateString} availableExercises={availableExercises} />
+          <AddWorkoutDialog date={dateString} availableExercises={availableExercises} />
+        </div>
       </div>
     </div>
   );
